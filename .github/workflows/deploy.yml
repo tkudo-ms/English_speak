@@ -30,7 +30,7 @@ jobs:
 
       - run: npm ci
 
-      - run: npx vitest --run --passWithNoTests
+      - run: npx vitest --run
         name: Run tests
 
       - run: npm run build
