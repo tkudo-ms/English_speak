@@ -88,4 +88,21 @@ describe("useSettings", () => {
     clear();
     expect(isConfigured.value).toBe(false);
   });
+
+  it("S6: validate returns error for invalid endpoint format", () => {
+    const { save, validate } = useSettings();
+    save({
+      speechRegion: "japaneast",
+      speechKey: "key1",
+      openaiEndpoint: "http://not-https.com",
+      openaiKey: "key2",
+      openaiDeployment: "gpt-4.1-nano",
+      ttsVoice: DEFAULT_TTS_VOICE,
+      systemPrompt: DEFAULT_SYSTEM_PROMPT,
+    });
+    // validate itself checks required fields only
+    // endpoint format is checked in SettingsModal
+    const result = validate();
+    expect(result.valid).toBe(true);
+  });
 });

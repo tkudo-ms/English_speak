@@ -6,21 +6,28 @@ import type { AppSettings } from "../types";
 defineProps<{ show: boolean }>();
 const emit = defineEmits<{ close: [] }>();
 
-const { settings, save } = useSettings();
+const { settings, save, validate } = useSettings();
 
 const form = reactive<AppSettings>({ ...settings.value });
 const errors = ref<string[]>([]);
 
 function handleSave() {
-  const tempErrors: string[] = [];
-  if (!form.speechRegion) tempErrors.push("Speech Region is required");
-  if (!form.speechKey) tempErrors.push("Speech Key is required");
-  if (!form.openaiEndpoint) tempErrors.push("OpenAI Endpoint is required");
-  if (!form.openaiKey) tempErrors.push("OpenAI Key is required");
-  if (!form.openaiDeployment) tempErrors.push("OpenAI Deployment is required");
+  // Temporarily apply form values to run validate()
+  const oldSettings = { ...settings.value };
+  settings.value = { ...form };
 
-  if (tempErrors.length > 0) {
-    errors.value = tempErrors;
+  const result = validate();
+
+  // Additional endpoint format check (S6 in test-design)
+  if (form.openaiEndpoint && !form.openaiEndpoint.startsWith("https://")) {
+    result.valid = false;
+    result.errors.push("OpenAI Endpoint must start with https://");
+  }
+
+  if (!result.valid) {
+    errors.value = result.errors;
+    // Restore old settings without persisting
+    settings.value = oldSettings;
     return;
   }
 

@@ -1,4 +1,4 @@
-import { ref, onUnmounted } from "vue";
+import { ref, watch, onUnmounted } from "vue";
 import type { AppState, AppError } from "../types";
 import { useSettings } from "./useSettings";
 import { useChat } from "./useChat";
@@ -15,6 +15,27 @@ export function useConversation() {
 
   // Set system prompt from settings
   chat.setSystemPrompt(settings.value.systemPrompt);
+
+  // Integrate errors from chat and speech into unified error
+  watch(
+    () => chat.error.value,
+    (chatError) => {
+      if (chatError) {
+        error.value = chatError;
+        appState.value = "idle";
+      }
+    },
+  );
+
+  watch(
+    () => speech.error.value,
+    (speechError) => {
+      if (speechError) {
+        error.value = speechError;
+        appState.value = "idle";
+      }
+    },
+  );
 
   // Wire up speech callbacks
   speech.onRecognizing((text) => {

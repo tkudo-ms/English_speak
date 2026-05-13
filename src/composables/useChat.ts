@@ -13,6 +13,10 @@ export function useChat() {
   let sentenceCallback: ((sentence: string) => void) | null = null;
   let systemPrompt = settings.value.systemPrompt;
 
+  // Abbreviations that should not trigger sentence splits
+  const ABBREVIATIONS =
+    /(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|St|U\.S|U\.K|e\.g|i\.e)\.\s*$/;
+
   function onSentence(callback: (sentence: string) => void) {
     sentenceCallback = callback;
   }
@@ -106,9 +110,13 @@ export function useChat() {
               currentAssistantText.value += content;
               sentenceBuffer += content;
 
+              // Check for sentence boundaries: .!?…
+              // But skip abbreviations (Mr. Dr. etc.)
+              // And treat consecutive !? as single boundary
               if (
-                /[.!?…]\s*$/.test(sentenceBuffer) ||
-                /\.{3}\s*$/.test(sentenceBuffer)
+                (/[.!?…]\s*$/.test(sentenceBuffer) ||
+                  /\.{3}\s*$/.test(sentenceBuffer)) &&
+                !ABBREVIATIONS.test(sentenceBuffer)
               ) {
                 sentenceCallback?.(sentenceBuffer.trim());
                 sentenceBuffer = "";

@@ -25,10 +25,12 @@ npm run dev
 ## API キーの取得方法
 
 ### Azure Speech Service
+
 1. [Azure Portal](https://portal.azure.com) で「Speech Services」リソースを作成
 2. 「キーとエンドポイント」からキーとリージョンをコピー
 
 ### Azure OpenAI Service
+
 1. [Azure Portal](https://portal.azure.com) で「Azure OpenAI」リソースを作成
 2. [Azure AI Foundry](https://ai.azure.com) でモデルをデプロイ（推奨: `gpt-4.1-nano`）
 3. エンドポイント URL、API キー、デプロイメント名をコピー

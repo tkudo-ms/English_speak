@@ -71,10 +71,27 @@ export function useSpeech() {
 
       recognizer.canceled = (_s, e) => {
         if (e.reason === SpeechSDK.CancellationReason.Error) {
+          const detail = e.errorDetails || "";
+          let message = "Speech recognition error";
+
+          if (
+            detail.includes("microphone") ||
+            detail.includes("Permission") ||
+            detail.includes("NotAllowedError")
+          ) {
+            message = "マイクを許可してください";
+          } else if (
+            detail.includes("AuthenticationFailure") ||
+            detail.includes("401")
+          ) {
+            message =
+              "Speech authentication failed. Check your region and key.";
+          }
+
           error.value = {
             source: "speech",
-            message: "Speech recognition error",
-            detail: e.errorDetails,
+            message,
+            detail,
           };
         }
         speechState.value.isRecognizing = false;

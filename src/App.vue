@@ -6,6 +6,7 @@ import SettingsModal from "./components/SettingsModal.vue";
 import ChatView from "./components/ChatView.vue";
 import ChatInput from "./components/ChatInput.vue";
 import SpeechControls from "./components/SpeechControls.vue";
+import ToastNotification from "./components/ToastNotification.vue";
 
 const { isConfigured } = useSettings();
 const {
@@ -14,6 +15,7 @@ const {
   interimText,
   currentAssistantText,
   isStreaming,
+  error,
   start,
   stop,
   sendText,
@@ -29,10 +31,24 @@ function handleStart() {
   }
   start();
 }
+
+function handleErrorDismiss() {
+  error.value = null;
+}
+
+function handleErrorOpenSettings() {
+  showSettings.value = true;
+}
 </script>
 
 <template>
   <div class="app-container">
+    <ToastNotification
+      :error="error"
+      @dismiss="handleErrorDismiss"
+      @open-settings="handleErrorOpenSettings"
+    />
+
     <header class="app-header">
       <h1>English Speaking Practice</h1>
       <button class="settings-btn" @click="showSettings = true">⚙️</button>

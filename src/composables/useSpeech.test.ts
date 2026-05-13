@@ -96,16 +96,27 @@ describe("useSpeech", () => {
     expect(mockRecognizer.stopContinuousRecognitionAsync).toHaveBeenCalled();
   });
 
-  it("SP5: enqueueSpeech calls speakTextAsync", async () => {
+  it("SP5: enqueueSpeech calls speakTextAsync for single sentence", async () => {
     const { enqueueSpeech } = useSpeech();
     enqueueSpeech("Hello!");
-    // Wait for async TTS
     await new Promise((r) => setTimeout(r, 10));
     expect(mockSynthesizer.speakTextAsync).toHaveBeenCalledWith(
       "Hello!",
       expect.any(Function),
       expect.any(Function),
     );
+  });
+
+  it("SP6: enqueueSpeech processes multiple sentences in order", async () => {
+    const { enqueueSpeech } = useSpeech();
+    enqueueSpeech("First.");
+    enqueueSpeech("Second.");
+    enqueueSpeech("Third.");
+    await new Promise((r) => setTimeout(r, 50));
+    expect(mockSynthesizer.speakTextAsync).toHaveBeenCalledTimes(3);
+    expect(mockSynthesizer.speakTextAsync.mock.calls[0][0]).toBe("First.");
+    expect(mockSynthesizer.speakTextAsync.mock.calls[1][0]).toBe("Second.");
+    expect(mockSynthesizer.speakTextAsync.mock.calls[2][0]).toBe("Third.");
   });
 
   it("SP7: cancelSpeech clears queue", async () => {
@@ -119,6 +130,30 @@ describe("useSpeech", () => {
     const { waitForSpeechEnd } = useSpeech();
     // No items in queue, should resolve immediately
     await waitForSpeechEnd();
+  });
+
+  it("SP9: mic permission error sets specific message", async () => {
+    const { startListening, error } = useSpeech();
+    await startListening();
+    mockRecognizer.canceled?.(null, {
+      reason: 1, // CancellationReason.Error
+      errorDetails: "microphone Permission denied NotAllowedError",
+    });
+    expect(error.value).not.toBeNull();
+    expect(error.value!.source).toBe("speech");
+    expect(error.value!.message).toContain("マイクを許可してください");
+  });
+
+  it("SP10: auth error sets speech source error", async () => {
+    const { startListening, error } = useSpeech();
+    await startListening();
+    mockRecognizer.canceled?.(null, {
+      reason: 1, // CancellationReason.Error
+      errorDetails: "AuthenticationFailure",
+    });
+    expect(error.value).not.toBeNull();
+    expect(error.value!.source).toBe("speech");
+    expect(error.value!.message).toContain("authentication");
   });
 
   it("SP11: dispose closes recognizer and synthesizer", async () => {
