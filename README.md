@@ -4,7 +4,7 @@ AI と英語で会話練習ができる Web アプリ。Azure Speech SDK（音�
 
 ## デモ
 
-GitHub Pages: `https://<username>.github.io/English_speak/`
+GitHub Pages: `https://tkudo-ms.github.io/English_speak/`
 
 ## 必要なもの
 
