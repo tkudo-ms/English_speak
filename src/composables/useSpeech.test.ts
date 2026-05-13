@@ -12,7 +12,7 @@ const mockRecognizer = {
 };
 
 const mockSynthesizer = {
-  speakTextAsync: vi.fn((text: string, onResult: Function) => {
+  speakTextAsync: vi.fn((_text: string, onResult: Function) => {
     onResult?.({ reason: 1 });
   }),
   close: vi.fn(),
